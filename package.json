@@ -1,0 +1,29 @@
+{
+  "name": "estirio",
+  "version": "1.0.0",
+  "description": "This is the project for bus booking platform",
+  "homepage": "https://github.com/parthdhameliya09/Estirio#readme",
+  "bugs": {
+    "url": "https://github.com/parthdhameliya09/Estirio/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parthdhameliya09/Estirio.git"
+  },
+  "license": "ISC",
+  "author": "/",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "prisma": "^7.8.0"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "dotenv": "^17.4.2"
+  }
+}
