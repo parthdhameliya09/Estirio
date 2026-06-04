@@ -14,7 +14,41 @@ CREATE TYPE "deck" AS ENUM ('upper', 'lower');
 CREATE TYPE "trip_status" AS ENUM ('scheduled', 'boarding', 'completed', 'cancelled', 'delayed', 'rescheduled');
 
 -- CreateEnum
+CREATE TYPE "seat_status" AS ENUM ('available', 'booked', 'locked');
+
+-- CreateEnum
+CREATE TYPE "booking_status" AS ENUM ('pending_payment', 'confirmed', 'cancelled', 'failed');
+
+-- CreateEnum
+CREATE TYPE "payment_status" AS ENUM ('pending', 'success', 'failed', 'refunded');
+
+-- CreateEnum
 CREATE TYPE "refund_status" AS ENUM ('pending', 'processing', 'success', 'failed');
+
+-- CreateTable
+CREATE TABLE "roles" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "roles_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "permissions" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "permissions_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "role_permissions" (
+    "id" TEXT NOT NULL,
+    "role_id" TEXT NOT NULL,
+    "permission_id" TEXT NOT NULL,
+
+    CONSTRAINT "role_permissions_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -148,8 +182,7 @@ CREATE TABLE "trips" (
 CREATE TABLE "trip_fares" (
     "id" TEXT NOT NULL,
     "trip_id" TEXT NOT NULL,
-    "source_id" TEXT NOT NULL,
-    "destination_id" TEXT NOT NULL,
+    "route_id" TEXT NOT NULL,
     "price" DOUBLE PRECISION NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -163,7 +196,7 @@ CREATE TABLE "seat_inventory" (
     "trip_id" TEXT NOT NULL,
     "bus_seat_id" TEXT NOT NULL,
     "price" DOUBLE PRECISION NOT NULL,
-    "status" TEXT NOT NULL,
+    "status" "seat_status" NOT NULL DEFAULT 'available',
     "locked_by" TEXT,
     "locked_until" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -181,7 +214,7 @@ CREATE TABLE "bookings" (
     "dropoff_stop_id" TEXT NOT NULL,
     "total_seats" INTEGER NOT NULL,
     "total_amount" DOUBLE PRECISION NOT NULL,
-    "status" TEXT NOT NULL,
+    "status" "booking_status" NOT NULL,
     "cancellation_reason" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -227,10 +260,10 @@ CREATE TABLE "payments" (
     "booking_id" TEXT NOT NULL,
     "payment_mode_id" TEXT NOT NULL,
     "provider_order_id" TEXT NOT NULL,
-    "provider_payment_id" TEXT NOT NULL,
+    "provider_payment_id" TEXT,
     "amount" DOUBLE PRECISION NOT NULL,
     "failure_reason" TEXT,
-    "status" TEXT NOT NULL,
+    "status" "payment_status" NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -274,12 +307,14 @@ CREATE TABLE "Tickets" (
 );
 
 -- CreateTable
-CREATE TABLE "current_bus_location" (
+CREATE TABLE "current_bus_locations" (
     "trip_id" TEXT NOT NULL,
-    "location" TEXT NOT NULL,
+    "latitude" DOUBLE PRECISION NOT NULL,
+    "longitude" DOUBLE PRECISION NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "current_bus_location_pkey" PRIMARY KEY ("trip_id")
+    CONSTRAINT "current_bus_locations_pkey" PRIMARY KEY ("trip_id")
 );
 
 -- CreateTable
@@ -297,10 +332,28 @@ CREATE TABLE "reviews" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "roles_name_key" ON "roles"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "permissions_name_key" ON "permissions"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "role_permissions_role_id_permission_id_key" ON "role_permissions"("role_id", "permission_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "bus_operators_gst_number_key" ON "bus_operators"("gst_number");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "bus_operators_email_key" ON "bus_operators"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "crews_license_number_key" ON "crews"("license_number");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "crews_user_id_operator_id_role_key" ON "crews"("user_id", "operator_id", "role");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "buses_vehicle_number_key" ON "buses"("vehicle_number");
@@ -309,7 +362,67 @@ CREATE UNIQUE INDEX "buses_vehicle_number_key" ON "buses"("vehicle_number");
 CREATE UNIQUE INDEX "buses_registration_number_key" ON "buses"("registration_number");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "seat_configs_bus_id_seat_number_key" ON "seat_configs"("bus_id", "seat_number");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "locations_name_latitude_longitude_key" ON "locations"("name", "latitude", "longitude");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "routes_source_id_destination_id_key" ON "routes"("source_id", "destination_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "route_stops_route_id_location_id_key" ON "route_stops"("route_id", "location_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "route_stops_route_id_stop_order_key" ON "route_stops"("route_id", "stop_order");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "trips_trip_code_key" ON "trips"("trip_code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "trips_route_id_bus_id_departure_time_key" ON "trips"("route_id", "bus_id", "departure_time");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "trip_fares_trip_id_route_id_key" ON "trip_fares"("trip_id", "route_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "seat_inventory_trip_id_bus_seat_id_key" ON "seat_inventory"("trip_id", "bus_seat_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "booking_seats_seat_inventory_id_key" ON "booking_seats"("seat_inventory_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "booking_seats_booking_id_seat_inventory_id_key" ON "booking_seats"("booking_id", "seat_inventory_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "booking_passengers_booking_seats_id_key" ON "booking_passengers"("booking_seats_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "payment_modes_name_key" ON "payment_modes"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "payments_provider_order_id_key" ON "payments"("provider_order_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "payments_provider_payment_id_key" ON "payments"("provider_payment_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "refunds_provider_refund_id_key" ON "refunds"("provider_refund_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "cancellation_policies_operator_id_hours_before_departure_key" ON "cancellation_policies"("operator_id", "hours_before_departure");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Tickets_booking_id_key" ON "Tickets"("booking_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "reviews_booking_id_key" ON "reviews"("booking_id");
+
+-- AddForeignKey
+ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_permission_id_fkey" FOREIGN KEY ("permission_id") REFERENCES "permissions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -357,10 +470,7 @@ ALTER TABLE "trips" ADD CONSTRAINT "trips_conductor_id_fkey" FOREIGN KEY ("condu
 ALTER TABLE "trip_fares" ADD CONSTRAINT "trip_fares_trip_id_fkey" FOREIGN KEY ("trip_id") REFERENCES "trips"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "trip_fares" ADD CONSTRAINT "trip_fares_source_id_fkey" FOREIGN KEY ("source_id") REFERENCES "locations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "trip_fares" ADD CONSTRAINT "trip_fares_destination_id_fkey" FOREIGN KEY ("destination_id") REFERENCES "locations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "trip_fares" ADD CONSTRAINT "trip_fares_route_id_fkey" FOREIGN KEY ("route_id") REFERENCES "routes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "seat_inventory" ADD CONSTRAINT "seat_inventory_trip_id_fkey" FOREIGN KEY ("trip_id") REFERENCES "trips"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -376,6 +486,12 @@ ALTER TABLE "bookings" ADD CONSTRAINT "bookings_user_id_fkey" FOREIGN KEY ("user
 
 -- AddForeignKey
 ALTER TABLE "bookings" ADD CONSTRAINT "bookings_trip_id_fkey" FOREIGN KEY ("trip_id") REFERENCES "trips"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "bookings" ADD CONSTRAINT "bookings_pickup_stop_id_fkey" FOREIGN KEY ("pickup_stop_id") REFERENCES "locations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "bookings" ADD CONSTRAINT "bookings_dropoff_stop_id_fkey" FOREIGN KEY ("dropoff_stop_id") REFERENCES "locations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "booking_seats" ADD CONSTRAINT "booking_seats_booking_id_fkey" FOREIGN KEY ("booking_id") REFERENCES "bookings"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -408,7 +524,7 @@ ALTER TABLE "cancellation_policies" ADD CONSTRAINT "cancellation_policies_operat
 ALTER TABLE "Tickets" ADD CONSTRAINT "Tickets_booking_id_fkey" FOREIGN KEY ("booking_id") REFERENCES "bookings"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "current_bus_location" ADD CONSTRAINT "current_bus_location_trip_id_fkey" FOREIGN KEY ("trip_id") REFERENCES "trips"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "current_bus_locations" ADD CONSTRAINT "current_bus_locations_trip_id_fkey" FOREIGN KEY ("trip_id") REFERENCES "trips"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "reviews" ADD CONSTRAINT "reviews_booking_id_fkey" FOREIGN KEY ("booking_id") REFERENCES "bookings"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -31,6 +31,7 @@ model role_permissions {
   permission_id String
   role roles @relation(fields: [role_id], references: [id])
   permission permissions @relation(fields: [permission_id], references: [id])
+  @@unique([role_id, permission_id])
 }
 
 model users {
@@ -55,7 +56,7 @@ model bus_operators {
   id String @id @default(uuid())
   name String
   type String
-  gst_number String
+  gst_number String @unique
   email String @unique
   phone_number String
   owner_user_id String
@@ -78,7 +79,7 @@ model crews {
   role crew_type
   user_id String
   operator_id String
-  license_number String
+  license_number String @unique
   license_expiry DateTime
   emergency_contact String
   is_active Boolean @default(true)
@@ -88,6 +89,7 @@ model crews {
   bus_operator bus_operators @relation(fields: [operator_id], references: [id])
   driver trips[] @relation("Driver")
   conductor trips[] @relation("Conductor")
+  @@unique([user_id, operator_id, role])
 }
 
 enum bus_type {
@@ -130,19 +132,20 @@ model seat_configs {
   is_ladies_seat Boolean
   bus buses @relation(fields: [bus_id], references: [id])
   seat_inventory seat_inventory[]
+  @@unique([bus_id, seat_number])
 }
 
 model locations {
   id String @id @default(uuid())
   name String
-  // location String - lat,long OR JSON object with lat and long
   latitude Float
   longitude Float
   source_routes routes[] @relation("Source")
   destination_routes routes[] @relation("Destination")
   route_stops route_stops[]
-  source trip_fares[] @relation("Source")
-  destination trip_fares[] @relation("Destination")
+  bookings_as_pickup bookings[] @relation("BookingPickupLocation")
+  bookings_as_dropoff bookings[] @relation("BookingDropoffLocation")
+  @@unique([name, latitude, longitude])
 }
 
 model routes {
@@ -156,6 +159,8 @@ model routes {
   destination locations @relation("Destination", fields: [destination_id], references: [id])
   route_stops route_stops[]
   trips trips[]
+  trip_fares trip_fares[]
+  @@unique([source_id, destination_id])
 }
 
 model route_stops {
@@ -165,6 +170,8 @@ model route_stops {
   stop_order Int
   route routes @relation(fields: [route_id], references: [id])
   location locations @relation(fields: [location_id], references: [id])
+  @@unique([route_id, location_id])
+  @@unique([route_id, stop_order])
 }
 
 enum trip_status {
@@ -199,21 +206,27 @@ model trips {
   trip_fares trip_fares[]
   seat_inventory seat_inventory[]
   bookings bookings[]
-  current_bus_location current_bus_location[]
+  current_bus_locations current_bus_locations?
   reviews reviews[]
+  @@unique([route_id, bus_id, departure_time])
 }
 
 model trip_fares {
   id String @id @default(uuid())
   trip_id String
-  source_id String
-  destination_id String
+  route_id String
   price Float
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   trip trips @relation(fields: [trip_id], references: [id])
-  source locations @relation("Source", fields: [source_id], references: [id])
-  destination locations @relation("Destination", fields: [destination_id], references: [id])
+  route routes @relation(fields: [route_id], references: [id])
+  @@unique([trip_id, route_id])
+}
+
+enum seat_status {
+  available
+  booked
+  locked
 }
 
 model seat_inventory {
@@ -221,7 +234,7 @@ model seat_inventory {
   trip_id String
   bus_seat_id String
   price Float
-  status String
+  status seat_status @default(available)
   locked_by String?
   locked_until DateTime?
   created_at DateTime @default(now())
@@ -230,6 +243,14 @@ model seat_inventory {
   bus_seat seat_configs @relation(fields: [bus_seat_id], references: [id])
   locked_by_user users? @relation(fields: [locked_by], references: [id])
   booking_seats booking_seats[]
+  @@unique([trip_id, bus_seat_id])
+}
+
+enum booking_status {
+  pending_payment
+  confirmed
+  cancelled
+  failed
 }
 
 model bookings {
@@ -240,14 +261,14 @@ model bookings {
   dropoff_stop_id String
   total_seats Int
   total_amount Float
-  status String
+  status booking_status
   cancellation_reason String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   user users @relation(fields: [user_id], references: [id])
   trip trips @relation(fields: [trip_id], references: [id])
-  // pickup_stop route_stops @relation("PickupStop", fields: [pickup_stop_id], references: [id])
-  // dropoff_stop route_stops @relation("DropoffStop", fields: [dropoff_stop_id], references: [id])
+  pickup_location locations @relation("BookingPickupLocation", fields: [pickup_stop_id], references: [id])
+  dropoff_location locations @relation("BookingDropoffLocation", fields: [dropoff_stop_id], references: [id])
   booking_seats booking_seats[]
   booking_passengers booking_passengers[]
   payments payments[]
@@ -264,6 +285,8 @@ model booking_seats {
   booking bookings @relation(fields: [booking_id], references: [id])
   seat_inventory seat_inventory @relation(fields: [seat_inventory_id], references: [id])
   booking_passengers booking_passengers[]
+  @@unique([seat_inventory_id])
+  @@unique([booking_id, seat_inventory_id])
 }
 
 model booking_passengers {
@@ -276,24 +299,32 @@ model booking_passengers {
   gender String
   booking bookings @relation(fields: [booking_id], references: [id])
   booking_seats booking_seats @relation(fields: [booking_seats_id], references: [id])
+  @@unique([booking_seats_id])
 }
 
 model payment_modes {
   id String @id @default(uuid())
-  name String
+  name String @unique
   is_active Boolean @default(true)
   payments payments[]
+}
+
+enum payment_status {
+  pending
+  success
+  failed
+  refunded
 }
 
 model payments {
   id String @id @default(uuid())
   booking_id String
   payment_mode_id String
-  provider_order_id String
-  provider_payment_id String
+  provider_order_id String @unique
+  provider_payment_id String? @unique
   amount Float
   failure_reason String?
-  status String
+  status payment_status
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   booking bookings @relation(fields: [booking_id], references: [id])
@@ -312,7 +343,7 @@ model refunds {
   id String @id @default(uuid())
   booking_id String
   payment_id String
-  provider_refund_id String?
+  provider_refund_id String? @unique
   amount Float
   reason String?
   status refund_status
@@ -329,22 +360,24 @@ model cancellation_policies {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   bus_operators bus_operators @relation(fields: [operator_id], references: [id])
+  @@unique([operator_id, hours_before_departure])
 }
 
 model Tickets {
   id String @id @default(uuid())
-  booking_id String
+  booking_id String @unique
   pdf_url String
   issued_at DateTime @default(now())
   booking bookings @relation(fields: [booking_id], references: [id])
 }
 
-model current_bus_location {
+model current_bus_locations {
   trip_id String @id @default(uuid())
-  location String
+  latitude Float
+  longitude Float
+  created_at DateTime @default(now())
   updated_at DateTime @default(now()) @updatedAt
   trip trips @relation(fields: [trip_id], references: [id])
-  // locations locations @relation(fields: [location], references: [id])
 }
 
 model reviews {
@@ -359,4 +392,5 @@ model reviews {
   booking bookings @relation(fields: [booking_id], references: [id])
   user users @relation(fields: [user_id], references: [id])
   trip trips @relation(fields: [trip_id], references: [id])
+  @@unique([booking_id])
 }
