@@ -48,6 +48,7 @@ model users {
   crews crews[]
   seat_inventory seat_inventory[]
   bookings bookings[]
+  reviews reviews[]
 }
 
 model bus_operators {
@@ -186,9 +187,9 @@ model trips {
   arrival_time DateTime
   available_seats Int
   status trip_status @default(scheduled)
-  cancellation_reason String
-  started_at DateTime
-  completed_at DateTime
+  cancellation_reason String?
+  started_at DateTime?
+  completed_at DateTime?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   route routes @relation(fields: [route_id], references: [id])
@@ -199,6 +200,7 @@ model trips {
   seat_inventory seat_inventory[]
   bookings bookings[]
   current_bus_location current_bus_location[]
+  reviews reviews[]
 }
 
 model trip_fares {
@@ -220,30 +222,30 @@ model seat_inventory {
   bus_seat_id String
   price Float
   status String
-  locked_by String
-  locked_until DateTime
+  locked_by String?
+  locked_until DateTime?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   trip trips @relation(fields: [trip_id], references: [id])
   bus_seat seat_configs @relation(fields: [bus_seat_id], references: [id])
-  locked_by_user users @relation(fields: [locked_by], references: [id])
+  locked_by_user users? @relation(fields: [locked_by], references: [id])
   booking_seats booking_seats[]
 }
 
 model bookings {
   id String @id @default(uuid())
   user_id String
-  trip_is String
+  trip_id String
   pickup_stop_id String
   dropoff_stop_id String
-  tota_seats Int
+  total_seats Int
   total_amount Float
   status String
   cancellation_reason String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   user users @relation(fields: [user_id], references: [id])
-  trip trips @relation(fields: [trip_is], references: [id])
+  trip trips @relation(fields: [trip_id], references: [id])
   // pickup_stop route_stops @relation("PickupStop", fields: [pickup_stop_id], references: [id])
   // dropoff_stop route_stops @relation("DropoffStop", fields: [dropoff_stop_id], references: [id])
   booking_seats booking_seats[]
@@ -251,6 +253,7 @@ model bookings {
   payments payments[]
   refunds refunds[]
   tickets Tickets[]
+  reviews reviews[]
 }
 
 model booking_seats {
@@ -289,7 +292,7 @@ model payments {
   provider_order_id String
   provider_payment_id String
   amount Float
-  failure_reason String
+  failure_reason String?
   status String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -298,14 +301,21 @@ model payments {
   refunds refunds[]
 }
 
+enum refund_status {
+  pending
+  processing
+  success
+  failed
+}
+
 model refunds {
   id String @id @default(uuid())
   booking_id String
   payment_id String
-  provider_refund_id String
+  provider_refund_id String?
   amount Float
-  reason String
-  status String
+  reason String?
+  status refund_status
   created_at DateTime @default(now())
   booking bookings @relation(fields: [booking_id], references: [id])
   payment payments @relation(fields: [payment_id], references: [id])
@@ -346,4 +356,7 @@ model reviews {
   comment String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+  booking bookings @relation(fields: [booking_id], references: [id])
+  user users @relation(fields: [user_id], references: [id])
+  trip trips @relation(fields: [trip_id], references: [id])
 }
