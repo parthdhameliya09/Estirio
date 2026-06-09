@@ -1,4 +1,4 @@
-import { booking_status } from "../../../generated/prisma/client";
+import { booking_status,seat_status } from "../../../generated/prisma/client";
 
 interface createBookinInputMaster{
     userId: string;
@@ -24,7 +24,26 @@ export interface passengerInfo{
     gender:string;
     seatInventoryId:string;
 }
+export interface seatRecordPayload{
+    seatInventoryId:string;
+    fare:number;
+    bookingId:string;
+}
+export interface passengerRecordPayload{
+    bookingId:string;
+    bookingSeatsId:string;
+    firstName:string;
+    lastName:string;
+    age:number;
+    gender:string;
+}
+export interface updateStatusBookingPayload{
+    status:seat_status,
+    lockedBy:string,
+    lockedUntil:Date
+}
 export interface BookingParams{
   bookingId: string;
 }
+
 

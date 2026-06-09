@@ -1,9 +1,9 @@
 import { Router } from 'express';
 
-// import authRoutes from "./modules/auth/auth.routes";
+import bookingRoutes from "./modules/booking/booking.route";
 
-const router = Router();
+const bookingRoute = Router();
 
-// router.use("/auth", authRoutes);
+bookingRoute.use("/booking",bookingRoutes );
 
-export default router;
+export default bookingRoute;
