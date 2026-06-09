@@ -21,96 +21,105 @@ model permissions {
 }
 
 model role_permissions {
-  id            String      @id @default(uuid())
-  role_id       String
-  permission_id String
-  permission    permissions @relation(fields: [permission_id], references: [id])
-  role          roles       @relation(fields: [role_id], references: [id])
+  id           String      @id @default(uuid())
+  roleId       String      @map("role_id")
+  permissionId String      @map("permission_id")
+  permission   permissions @relation(fields: [permissionId], references: [id])
+  role         roles       @relation(fields: [roleId], references: [id])
 
-  @@unique([role_id, permission_id])
+  @@unique([roleId, permissionId])
 }
 
 model users {
   id             String           @id @default(uuid())
-  role_id        String
-  first_name     String
-  last_name      String
+  roleId         String           @map("role_id")
+  firstName      String           @map("first_name")
+  lastName       String           @map("last_name")
   email          String           @unique
-  phone_number   String
-  is_verified    Boolean          @default(false)
-  created_at     DateTime         @default(now())
-  updated_at     DateTime         @updatedAt
+  password       String           @map("password_hash")
+  phoneNumber    String           @map("phone_number")
+  isVerified     Boolean          @default(false) @map("is_verified")
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
   bookings       bookings[]
   bus_operators  bus_operators[]
   crews          crews[]
   reviews        reviews[]
   seat_inventory seat_inventory[]
-  role           roles            @relation(fields: [role_id], references: [id])
+  role           roles            @relation(fields: [roleId], references: [id])
+  // user_auth      user_auth_providers[]   
 }
 
+// model user_auth_providers {
+//   id                    String                  @id @default(uuid())
+//   user_id               String          
+//   provider              auth_provider          
+//   provider_uid          String                  @unique
+//   createdAt            DateTime                @default(now())
+//   user                  users                   @relation(fields: [user_id],references: [id])
+// }
 model bus_operators {
   id                    String                  @id @default(uuid())
   name                  String
-  gst_number            String                  @unique
+  gstNumber             String                  @unique @map("gst_number")
   email                 String                  @unique
-  phone_number          String
-  owner_user_id         String
-  is_active             Boolean                 @default(true)
-  created_at            DateTime                @default(now())
-  updated_at            DateTime                @updatedAt
-  is_private            Boolean                 @default(true)
-  owner                 users                   @relation(fields: [owner_user_id], references: [id])
+  phoneNumber           String                  @map("phone_number")
+  ownerUserId           String                  @map("owner_user_id")
+  isActive              Boolean                 @default(true) @map("is_active")
+  createdAt             DateTime                @default(now()) @map("created_at")
+  isPrivate             Boolean                 @default(true) @map("is_private")
+  owner                 users                   @relation(fields: [ownerUserId], references: [id])
   buses                 buses[]
   cancellation_policies cancellation_policies[]
   crews                 crews[]
 }
 
 model crews {
-  id                String        @id @default(uuid())
-  role              crew_type
-  user_id           String
-  operator_id       String
-  license_number    String        @unique
-  license_expiry    DateTime
-  emergency_contact String
-  is_active         Boolean       @default(true)
-  created_at        DateTime      @default(now())
-  updated_at        DateTime      @updatedAt
-  bus_operator      bus_operators @relation(fields: [operator_id], references: [id])
-  user              users         @relation(fields: [user_id], references: [id])
-  conductor         trips[]       @relation("Conductor")
-  driver            trips[]       @relation("Driver")
+  id               String        @id @default(uuid())
+  role             crew_type
+  userId           String        @map("user_id")
+  operatorId       String        @map("operator_id")
+  licenseNumber    String        @unique @map("license_number")
+  licenseExpiry    DateTime      @map("license_expiry")
+  emergencyContact String        @map("emergency_contact")
+  isActive         Boolean       @default(true) @map("is_active")
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+  bus_operator     bus_operators @relation(fields: [operatorId], references: [id])
+  user             users         @relation(fields: [userId], references: [id])
+  conductor        trips[]       @relation("Conductor")
+  driver           trips[]       @relation("Driver")
 
-  @@unique([user_id, operator_id, role])
+  @@unique([userId, operatorId, role])
 }
 
 model buses {
-  id                  String         @id @default(uuid())
-  operator_id         String
-  vehicle_number      String         @unique
-  registration_number String         @unique
-  type                bus_type
-  total_seats         Int
-  is_active           Boolean        @default(true)
-  created_at          DateTime       @default(now())
-  updated_at          DateTime       @updatedAt
-  bus_operator        bus_operators  @relation(fields: [operator_id], references: [id])
-  seat_configs        seat_configs[]
-  trips               trips[]
+  id                 String         @id @default(uuid())
+  operatorId         String         @map("operator_id")
+  vehicleNumber      String         @unique @map("vehicle_number")
+  registrationNumber String         @unique @map("registration_number")
+  type               bus_type
+  totalSeats         Int            @map("total_seats")
+  isActive           Boolean        @default(true) @map("is_active")
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt @map("updated_at")
+  bus_operator       bus_operators  @relation(fields: [operatorId], references: [id])
+  seat_configs       seat_configs[]
+  trips              trips[]
 }
 
 model seat_configs {
   id             String           @id @default(uuid())
-  bus_id         String
-  seat_number    String
-  seat_type      seat_type
+  busId          String           @map("bus_id")
+  seatNumber     String           @map("seat_number")
+  seatType       seat_type        @map("seat_type")
   deck           deck
-  is_window      Boolean
-  is_ladies_seat Boolean
-  bus            buses            @relation(fields: [bus_id], references: [id])
+  isWindow       Boolean          @map("is_window")
+  isLadiesSeat   Boolean          @map("is_ladies_seat")
+  bus            buses            @relation(fields: [busId], references: [id])
   seat_inventory seat_inventory[]
 
-  @@unique([bus_id, seat_number])
+  @@unique([busId, seatNumber])
 }
 
 model locations {
@@ -128,218 +137,218 @@ model locations {
 }
 
 model routes {
-  id                         String        @id @default(uuid())
-  source_id                  String
-  destination_id             String
-  distance_km                Float
-  estimated_duration_minutes Int
-  is_active                  Boolean       @default(true)
-  route_stops                route_stops[]
-  destination                locations     @relation("Destination", fields: [destination_id], references: [id])
-  source                     locations     @relation("Source", fields: [source_id], references: [id])
-  trip_fares                 trip_fares[]
-  trips                      trips[]
+  id                       String        @id @default(uuid())
+  sourceId                 String        @map("source_id")
+  destinationId            String        @map("destination_id")
+  distanceKm               Float         @map("distance_km")
+  estimatedDurationMinutes Int           @map("estimated_duration_minutes")
+  isActive                 Boolean       @default(true) @map("is_active")
+  route_stops              route_stops[]
+  destination              locations     @relation("Destination", fields: [destinationId], references: [id])
+  source                   locations     @relation("Source", fields: [sourceId], references: [id])
+  trip_fares               trip_fares[]
+  trips                    trips[]
 
-  @@unique([source_id, destination_id])
+  @@unique([sourceId, destinationId])
 }
 
 model route_stops {
-  id          String    @id @default(uuid())
-  route_id    String
-  location_id String
-  stop_order  Int
-  location    locations @relation(fields: [location_id], references: [id])
-  route       routes    @relation(fields: [route_id], references: [id])
+  id         String    @id @default(uuid())
+  routeId    String    @map("route_id")
+  locationId String    @map("location_id")
+  stopOrder  Int       @map("stop_order")
+  location   locations @relation(fields: [locationId], references: [id])
+  route      routes    @relation(fields: [routeId], references: [id])
 
-  @@unique([route_id, location_id])
-  @@unique([route_id, stop_order])
+  @@unique([routeId, locationId])
+  @@unique([routeId, stopOrder])
 }
 
 model trips {
   id                    String                 @id @default(uuid())
-  trip_code             String                 @unique
-  route_id              String
-  bus_id                String
-  driver_id             String
-  conductor_id          String
-  departure_time        DateTime
-  arrival_time          DateTime
-  available_seats       Int
+  tripCode              String                 @unique @map("trip_code")
+  routeId               String                 @map("route_id")
+  busId                 String                 @map("bus_id")
+  driverId              String                 @map("driver_id")
+  conductorId           String                 @map("conductor_id")
+  departureTime         DateTime               @map("departure_time")
+  arrivalTime           DateTime               @map("arrival_time")
+  availableSeats        Int                    @map("available_seats")
   status                trip_status            @default(scheduled)
-  cancellation_reason   String?
-  started_at            DateTime?
-  completed_at          DateTime?
-  created_at            DateTime               @default(now())
-  updated_at            DateTime               @updatedAt
+  cancellationReason    String?                @map("cancellation_reason")
+  startedAt             DateTime?              @map("started_at")
+  completedAt           DateTime?              @map("completed_at")
+  createdAt             DateTime               @default(now()) @map("created_at")
+  updatedAt             DateTime               @updatedAt @map("updated_at")
   bookings              bookings[]
   current_bus_locations current_bus_locations?
   reviews               reviews[]
   seat_inventory        seat_inventory[]
   trip_fares            trip_fares[]
-  bus                   buses                  @relation(fields: [bus_id], references: [id])
-  conductor             crews                  @relation("Conductor", fields: [conductor_id], references: [id])
-  driver                crews                  @relation("Driver", fields: [driver_id], references: [id])
-  route                 routes                 @relation(fields: [route_id], references: [id])
+  bus                   buses                  @relation(fields: [busId], references: [id])
+  conductor             crews                  @relation("Conductor", fields: [conductorId], references: [id])
+  driver                crews                  @relation("Driver", fields: [driverId], references: [id])
+  route                 routes                 @relation(fields: [routeId], references: [id])
 
-  @@unique([route_id, bus_id, departure_time])
+  @@unique([routeId, busId, departureTime])
 }
 
 model trip_fares {
-  id         String   @id @default(uuid())
-  trip_id    String
-  route_id   String
-  price      Float
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  route      routes   @relation(fields: [route_id], references: [id])
-  trip       trips    @relation(fields: [trip_id], references: [id])
+  id        String   @id @default(uuid())
+  tripId    String   @map("trip_id")
+  routeId   String   @map("route_id")
+  price     Float
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  route     routes   @relation(fields: [routeId], references: [id])
+  trip      trips    @relation(fields: [tripId], references: [id])
 
-  @@unique([trip_id, route_id])
+  @@unique([tripId, routeId])
 }
 
 model seat_inventory {
   id             String         @id @default(uuid())
-  trip_id        String
-  bus_seat_id    String
+  tripId         String         @map("trip_id")
+  busSeatId      String         @map("bus_seat_id")
   price          Float
   status         seat_status    @default(available)
-  locked_by      String?
-  locked_until   DateTime?
-  created_at     DateTime       @default(now())
-  updated_at     DateTime       @updatedAt
+  lockedBy       String?        @map("locked_by")
+  lockedUntil    DateTime?      @map("locked_until")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
   booking_seats  booking_seats?
-  bus_seat       seat_configs   @relation(fields: [bus_seat_id], references: [id])
-  locked_by_user users?         @relation(fields: [locked_by], references: [id])
-  trip           trips          @relation(fields: [trip_id], references: [id])
+  bus_seat       seat_configs   @relation(fields: [busSeatId], references: [id])
+  locked_by_user users?         @relation(fields: [lockedBy], references: [id])
+  trip           trips          @relation(fields: [tripId], references: [id])
 
-  @@unique([trip_id, bus_seat_id])
+  @@unique([tripId, busSeatId])
 }
 
 model bookings {
-  id                  String               @id @default(uuid())
-  user_id             String
-  trip_id             String
-  pickup_stop_id      String
-  dropoff_stop_id     String
-  total_seats         Int
-  total_amount        Float
-  status              booking_status
-  cancellation_reason String
-  created_at          DateTime             @default(now())
-  updated_at          DateTime             @updatedAt
-  tickets             Tickets?
-  booking_passengers  booking_passengers[]
-  booking_seats       booking_seats[]
-  dropoff_location    locations            @relation("BookingDropoffLocation", fields: [dropoff_stop_id], references: [id])
-  pickup_location     locations            @relation("BookingPickupLocation", fields: [pickup_stop_id], references: [id])
-  trip                trips                @relation(fields: [trip_id], references: [id])
-  user                users                @relation(fields: [user_id], references: [id])
-  payments            payments[]
-  refunds             refunds[]
-  reviews             reviews?
+  id                 String               @id @default(uuid())
+  userId             String               @map("user_id")
+  tripId             String               @map("trip_id")
+  pickupStopId       String               @map("pickup_stop_id")
+  dropoffStopId      String               @map("dropoff_stop_id")
+  totalSeats         Int                  @map("total_seats")
+  totalAmount        Float                @map("total_amount")
+  status             booking_status
+  cancellationReason String               @map("cancellation_reason")
+  createdAt          DateTime             @default(now()) @map("created_at")
+  updatedAt          DateTime             @updatedAt @map("updated_at")
+  tickets            Tickets?
+  booking_passengers booking_passengers[]
+  booking_seats      booking_seats[]
+  dropoff_location   locations            @relation("BookingDropoffLocation", fields: [dropoffStopId], references: [id])
+  pickup_location    locations            @relation("BookingPickupLocation", fields: [pickupStopId], references: [id])
+  trip               trips                @relation(fields: [tripId], references: [id])
+  user               users                @relation(fields: [userId], references: [id])
+  payments           payments[]
+  refunds            refunds[]
+  reviews            reviews?
 }
 
 model booking_seats {
   id                 String              @id @default(uuid())
-  booking_id         String
-  seat_inventory_id  String              @unique
+  bookingId          String              @map("booking_id")
+  seatInventoryId    String              @unique @map("seat_inventory_id")
   fare               Float
   booking_passengers booking_passengers?
-  booking            bookings            @relation(fields: [booking_id], references: [id])
-  seat_inventory     seat_inventory      @relation(fields: [seat_inventory_id], references: [id])
+  booking            bookings            @relation(fields: [bookingId], references: [id])
+  seat_inventory     seat_inventory      @relation(fields: [seatInventoryId], references: [id])
 
-  @@unique([booking_id, seat_inventory_id])
+  @@unique([bookingId, seatInventoryId])
 }
 
 model booking_passengers {
-  id               String        @id @default(uuid())
-  booking_id       String
-  booking_seats_id String        @unique
-  first_name       String
-  last_name        String
-  age              Int
-  gender           String
-  booking          bookings      @relation(fields: [booking_id], references: [id])
-  booking_seats    booking_seats @relation(fields: [booking_seats_id], references: [id])
+  id             String        @id @default(uuid())
+  bookingId      String        @map("booking_id")
+  bookingSeatsId String        @unique @map("booking_seats_id")
+  firstName      String        @map("first_name")
+  lastName       String        @map("last_name")
+  age            Int
+  gender         String
+  booking        bookings      @relation(fields: [bookingId], references: [id])
+  booking_seats  booking_seats @relation(fields: [bookingSeatsId], references: [id])
 }
 
 model payment_modes {
-  id        String     @id @default(uuid())
-  name      String     @unique
-  is_active Boolean    @default(true)
-  payments  payments[]
+  id       String     @id @default(uuid())
+  name     String     @unique
+  isActive Boolean    @default(true) @map("is_active")
+  payments payments[]
 }
 
 model payments {
-  id                  String         @id @default(uuid())
-  booking_id          String
-  payment_mode_id     String
-  provider_order_id   String         @unique
-  provider_payment_id String?        @unique
-  amount              Float
-  failure_reason      String?
-  status              payment_status
-  created_at          DateTime       @default(now())
-  updated_at          DateTime       @updatedAt
-  booking             bookings       @relation(fields: [booking_id], references: [id])
-  payment_mode        payment_modes  @relation(fields: [payment_mode_id], references: [id])
-  refunds             refunds[]
+  id                String         @id @default(uuid())
+  bookingId         String         @map("booking_id")
+  paymentModeId     String         @map("payment_mode_id")
+  providerOrderId   String         @unique @map("provider_order_id")
+  providerPaymentId String?        @unique @map("provider_payment_id")
+  amount            Float
+  failureReason     String?        @map("failure_reason")
+  status            payment_status
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+  booking           bookings       @relation(fields: [bookingId], references: [id])
+  payment_mode      payment_modes  @relation(fields: [paymentModeId], references: [id])
+  refunds           refunds[]
 }
 
 model refunds {
-  id                 String        @id @default(uuid())
-  booking_id         String
-  payment_id         String
-  provider_refund_id String?       @unique
-  amount             Float
-  reason             String?
-  status             refund_status
-  created_at         DateTime      @default(now())
-  booking            bookings      @relation(fields: [booking_id], references: [id])
-  payment            payments      @relation(fields: [payment_id], references: [id])
+  id               String        @id @default(uuid())
+  bookingId        String        @map("booking_id")
+  paymentId        String        @map("payment_id")
+  providerRefundId String?       @unique @map("provider_refund_id")
+  amount           Float
+  reason           String?
+  status           refund_status
+  createdAt        DateTime      @default(now()) @map("created_at")
+  booking          bookings      @relation(fields: [bookingId], references: [id])
+  payment          payments      @relation(fields: [paymentId], references: [id])
 }
 
 model cancellation_policies {
-  id                     String        @id @default(uuid())
-  operator_id            String
-  hours_before_departure Int
-  refund_percentage      Int
-  created_at             DateTime      @default(now())
-  updated_at             DateTime      @updatedAt
-  bus_operators          bus_operators @relation(fields: [operator_id], references: [id])
+  id                   String        @id @default(uuid())
+  operatorId           String        @map("operator_id")
+  hoursBeforeDeparture Int           @map("hours_before_departure")
+  refundPercentage     Int           @map("refund_percentage")
+  createdAt            DateTime      @default(now()) @map("created_at")
+  updatedAt            DateTime      @updatedAt @map("updated_at")
+  bus_operators        bus_operators @relation(fields: [operatorId], references: [id])
 
-  @@unique([operator_id, hours_before_departure])
+  @@unique([operatorId, hoursBeforeDeparture])
 }
 
 model Tickets {
-  id         String   @id @default(uuid())
-  booking_id String   @unique
-  pdf_url    String
-  issued_at  DateTime @default(now())
-  booking    bookings @relation(fields: [booking_id], references: [id])
+  id        String   @id @default(uuid())
+  bookingId String   @unique @map("booking_id")
+  pdfUrl    String   @map("pdf_url")
+  issuedAt  DateTime @default(now()) @map("issued_at")
+  booking   bookings @relation(fields: [bookingId], references: [id])
 }
 
 model current_bus_locations {
-  trip_id    String   @id @default(uuid())
-  latitude   Float
-  longitude  Float
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now()) @updatedAt
-  trip       trips    @relation(fields: [trip_id], references: [id])
+  tripId    String   @id @default(uuid()) @map("trip_id")
+  latitude  Float
+  longitude Float
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  trip      trips    @relation(fields: [tripId], references: [id])
 }
 
 model reviews {
-  id         String   @id @default(uuid())
-  booking_id String   @unique
-  user_id    String
-  trip_id    String
-  rating     Int
-  comment    String
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  booking    bookings @relation(fields: [booking_id], references: [id])
-  trip       trips    @relation(fields: [trip_id], references: [id])
-  user       users    @relation(fields: [user_id], references: [id])
+  id        String   @id @default(uuid())
+  bookingId String   @unique @map("booking_id")
+  userId    String   @map("user_id")
+  tripId    String   @map("trip_id")
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  booking   bookings @relation(fields: [bookingId], references: [id])
+  trip      trips    @relation(fields: [tripId], references: [id])
+  user      users    @relation(fields: [userId], references: [id])
 }
 
 enum crew_type {
@@ -389,6 +398,11 @@ enum payment_status {
   success
   failed
   refunded
+}
+
+enum auth_provider {
+  google
+  phone
 }
 
 enum refund_status {
