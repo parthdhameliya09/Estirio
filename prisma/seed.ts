@@ -54,8 +54,8 @@ async function seedRolePermissions() {
   //Admin Permission
     for (const permission of permissions) {
       rolePermissions.push({
-        role_id: roleMap.get("admin")!,
-        permission_id: permission.id,
+        roleId: roleMap.get("admin")!,
+        permissionId: permission.id,
       });
     }
   
@@ -93,8 +93,8 @@ async function seedRolePermissions() {
   
     for (const permission of passengerPermissions) {
       rolePermissions.push({
-        role_id: roleMap.get("passenger")!,
-        permission_id: permissionMap.get(permission)!,
+        roleId: roleMap.get("passenger")!,
+        permissionId: permissionMap.get(permission)!,
       });
     }
   
@@ -160,8 +160,8 @@ async function seedRolePermissions() {
   
     for (const permission of operatorPermissions) {
       rolePermissions.push({
-        role_id: roleMap.get("operator")!,
-        permission_id: permissionMap.get(permission)!,
+        roleId: roleMap.get("operator")!,
+        permissionId: permissionMap.get(permission)!,
       });
     }
   
@@ -179,8 +179,8 @@ async function seedRolePermissions() {
   
     for (const permission of crewPermissions) {
       rolePermissions.push({
-        role_id: roleMap.get("crew")!,
-        permission_id: permissionMap.get(permission)!,
+        roleId: roleMap.get("crew")!,
+        permissionId: permissionMap.get(permission)!,
       });
     }
   
@@ -222,6 +222,7 @@ main()
     console.log(`Seeding done`)
     await prisma.$disconnect();
     await pool.end();
+    process.exit(1)
 })
 .catch(async(e)=>{
     console.log(`Seeding failed Error : ${e}`)
