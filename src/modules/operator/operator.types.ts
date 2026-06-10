@@ -1,4 +1,6 @@
-export interface CreateOperatorRequest {
+
+export interface CreateOperatorRequest{
+    userId : string
     name: string;
     gstNumber: string;
     email: string;
@@ -7,6 +9,7 @@ export interface CreateOperatorRequest {
 }
 
 export interface UpdateOperatorRequest {
+    id : string
     name?: string;
     phoneNumber?: string;
     isPrivate?: boolean;

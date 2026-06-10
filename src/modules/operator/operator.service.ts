@@ -2,22 +2,21 @@ import {createOperator as createOperatorDao,
     getOperatorById as getOperatorByIdDao,
     updateOperator as updateOperatorDao } from "./operator.dao"
 import { CreateOperatorRequest,UpdateOperatorRequest } from "./operator.types"
-import { Prisma } from "../../../generated/prisma/client"
 
-export const createOperator = async(input:CreateOperatorRequest,UserId:string) => {
-    const data: Prisma.bus_operatorsCreateInput = {
-        name: input.name,
-        gstNumber : input.gstNumber,
-        email : input.email,
-        phoneNumber : input.phoneNumber,
-        isPrivate : input.isPrivate ?? true,
+
+export const createOperator = async({name, gstNumber, email, phoneNumber, isPrivate,userId}:CreateOperatorRequest) => {
+    const data = {
+        name,
+        gstNumber,
+        email,
+        phoneNumber,
+        isPrivate,
         owner: {
             connect: {
-            id: UserId
+                id: userId
             }
         }
     }
-    
     const operator = await createOperatorDao(data);
     return operator;    
 } 
@@ -30,13 +29,18 @@ export const getOperator = async (id:string)=>{
     return operator;
 }
 
-export const updateOperator = async(input:UpdateOperatorRequest,id:string)=>{
-    const updateData : Prisma.bus_operatorsUpdateInput = {};
+export const updateOperator = async({id,name,phoneNumber,isPrivate,isActive}:UpdateOperatorRequest)=>{
+    const updateData  = {
+        name,
+        phoneNumber,
+        isPrivate,
+        isActive
+    };
 
-    if(input.name !== undefined) updateData.name = input.name;
-    if(input.phoneNumber !== undefined) updateData.phoneNumber = input.phoneNumber;
-    if(input.isPrivate !== undefined) updateData.isPrivate = input.isPrivate;
-    if(input.isActive !== undefined) updateData.isActive = input.isActive;
+    if(name !== undefined) updateData.name = name;
+    if(phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
+    if(isPrivate !== undefined) updateData.isPrivate = isPrivate;
+    if(isActive !== undefined) updateData.isActive = isActive;
 
     const updatedOperator = await updateOperatorDao({id,updateData});
     return updatedOperator;

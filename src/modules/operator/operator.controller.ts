@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-
 import {
   createOperator as createOperatorService,
   getOperator as getOperatorService,
   updateOperator as updateOperatorService,
 } from "./operator.service";
+import {updateOperatorSchema , getOperatorSchema} from "./operator.validation";
 
 export const createOperatorController = async (
   req: Request,
@@ -12,8 +12,9 @@ export const createOperatorController = async (
 ) => {
   try {
     const userId = req.user.id;
+    const { name, gstNumber, email, phoneNumber, isPrivate } = req.body;
 
-    const operator = await createOperatorService(req.body, userId);
+    const operator = await createOperatorService({name, gstNumber, email, phoneNumber, isPrivate,userId});
 
     return res.status(201).json({
       success: true,
@@ -29,18 +30,10 @@ export const createOperatorController = async (
 
 
 export const getOperatorController = async (
-  req: Request,
-  res: Response
+  req: Request<getOperatorSchema['params']>,res: Response
 ) => {
   try {
-    const id = req.params.id as string;
-
-    if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: "Id is required",
-      });
-    }
+    const id = req.params.id;
 
     const operator = await getOperatorService(id);
 
@@ -57,20 +50,15 @@ export const getOperatorController = async (
 };
 
 export const updateOperatorController = async (
-  req: Request,
+  req: Request<updateOperatorSchema['params']>,
   res: Response
 ) => {
   try {
-    const id = req.params.id as string;
+    const id = req.params.id;
 
-    if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: "Id is required",
-      });
-    }
+    const {name,phoneNumber,isPrivate,isActive} = req.body;
 
-    const operator = await updateOperatorService(req.body, id);
+    const operator = await updateOperatorService({id,name,phoneNumber,isPrivate,isActive});
 
     return res.status(200).json({
       success: true,
