@@ -36,7 +36,7 @@ model users {
   firstName      String           @map("first_name")
   lastName       String           @map("last_name")
   email          String           @unique
-  password       String           @map("password_hash")
+  password       String
   phoneNumber    String           @map("phone_number")
   isVerified     Boolean          @default(false) @map("is_verified")
   createdAt      DateTime         @default(now()) @map("created_at")
@@ -47,17 +47,8 @@ model users {
   reviews        reviews[]
   seat_inventory seat_inventory[]
   role           roles            @relation(fields: [roleId], references: [id])
-  // user_auth      user_auth_providers[]   
 }
 
-// model user_auth_providers {
-//   id                    String                  @id @default(uuid())
-//   user_id               String          
-//   provider              auth_provider          
-//   provider_uid          String                  @unique
-//   createdAt            DateTime                @default(now())
-//   user                  users                   @relation(fields: [user_id],references: [id])
-// }
 model bus_operators {
   id                    String                  @id @default(uuid())
   name                  String
