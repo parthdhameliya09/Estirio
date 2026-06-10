@@ -15,11 +15,11 @@ export const getOperatorById = (id: string) => {
     })
 }
 
-export const updateOperator = (id: string, data: Prisma.bus_operatorsUpdateInput) => {
+export const updateOperator = ({id, updateData} : {id:string,updateData:Prisma.bus_operatorsUpdateInput}) => {
     return prisma.bus_operators.update({
         where: {
             id
         },
-        data
+        data:updateData
     })
 }
