@@ -1,16 +1,18 @@
 import {
   findAllBookings,
   findBookingById,
-  updateBookingById,
+  cancleBookingById,
   getTripById,
   getSeatsByIds,
   createBookingRecord,
   createBookingSeatsRecord,
   createPassengerRecord,
   upateSeatStatus,
+  getBookingSeatsById,
+  releaseSeat
 } from "./booking.dao.js";
 import { Prisma } from "../../../generated/prisma/client.js";
-import { createBookingInput, passengerRecordPayload } from "./booking.types.js";
+import { createBookingInput,UpdateBookingRecord} from "./booking.types.js";
 import prisma from "../../config/prisma.js";
 import { booking_status,seat_status } from "../../../generated/prisma/client.js";
 
@@ -22,6 +24,7 @@ export const createBooking = async (bookingData: createBookingInput) => {
       throw new Error("Trip not found");
     }
     const seatIds = passenger.map((p) => p.seatInventoryId);
+
     const result = await prisma.$transaction(async (tx) => {
       const seats = await getSeatsByIds(seatIds,tx);
       if (seats.length !== seatIds.length) {
@@ -86,13 +89,20 @@ export const createBooking = async (bookingData: createBookingInput) => {
 export const getBookings = async () => {
   return await findAllBookings();
 };
-
 export const getBookingById = async (bookingId: string) => {
   return await findBookingById(bookingId);
 };
-export const updateBooking = async (
-  bookingId: string,
-  bookingData: Partial<createBookingInput>,
-) => {
-  return await updateBookingById(bookingId, bookingData);
+
+export const cancleBooking = async ({bookingId,cancellationReason}:{bookingId: string, cancellationReason:string}) => {
+  const updatePayload={
+    status:booking_status.cancelled,
+    cancellationReason
+  }
+  return prisma.$transaction(async(tx)=>{
+    const bookingSeats=await getBookingSeatsById(bookingId,tx);
+    const seatIdS=bookingSeats.map((seat)=>seat.seatInventoryId);
+    const upadatebooking=cancleBookingById(bookingId, updatePayload,tx);
+    await releaseSeat(seatIdS,tx);
+    return upadatebooking;
+  })
 };

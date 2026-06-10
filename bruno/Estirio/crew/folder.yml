@@ -1,0 +1,7 @@
+info:
+  name: crew
+  type: folder
+  seq: 1
+
+request:
+  auth: inherit

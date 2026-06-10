@@ -1,6 +1,11 @@
 import {Request,Response} from "express";
-import {getBookings as getBookingsService,createBooking as createBookingService,getBookingById as getBookingByIdService,updateBooking as updateBookingService} from "./booking.service.js";
-import {createBookingInput,BookingParams} from "./booking.types.js";
+import {
+    getBookings as getBookingsService,
+    createBooking as createBookingService,
+    getBookingById as getBookingByIdService,
+    cancleBooking as cancleBookingService} from "./booking.service.js";
+import {BookingParams} from "./booking.types.js";
+import {updateBookingParamsRequest} from "./booking.validation.js"
 
 
 export const bookings = async (req:Request, res:Response)=>{
@@ -8,7 +13,7 @@ export const bookings = async (req:Request, res:Response)=>{
     //    const userId=req.user.id;
        const bookingData=req.body;
        const result=await createBookingService(bookingData);
-       res.status(201).json(result);
+       return res.status(201).json(result);
     }
     catch(error){
         res.status(500).json({message:"Internal Server Error"})
@@ -17,7 +22,7 @@ export const bookings = async (req:Request, res:Response)=>{
 export const getBooking = async (req:Request, res:Response)=>{
     try{
        const bookings= await getBookingsService();
-        res.status(200).json(bookings);
+       return res.status(200).json(bookings);
     }
     catch(error){
         res.status(500).json({message:"Internal Server Error"})
@@ -27,18 +32,18 @@ export const getBookingById = async (req:Request<BookingParams>, res:Response)=>
     try{
        const {bookingId}=req.params;
        const result= await getBookingByIdService(bookingId);
-        res.status(200).json(result);
+       return res.status(200).json(result);
     }
     catch(error){
         res.status(500).json({message:"Internal Server Error"})
     }
 }
-export const updateBooking = async (req:Request<BookingParams>, res:Response)=>{
+export const updateBooking = async (req:Request<updateBookingParamsRequest['params']>, res:Response)=>{
     try{
        const {bookingId}=req.params;
-       const bookingData=req.body;
-       const result= await updateBookingService(bookingId, bookingData);
-        res.status(200).json(result);
+       const {cancellationReason}=req.body;
+       const result= await cancleBookingService({bookingId, cancellationReason});
+        return res.status(200).json(result);
     }
     catch(error){
         res.status(500).json({message:"Internal Server Error"})

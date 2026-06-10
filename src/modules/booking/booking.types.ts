@@ -46,4 +46,8 @@ export interface BookingParams{
   bookingId: string;
 }
 
+export interface UpdateBookingRecord{
+    cancellationReason:string,
+    status:booking_status
+}
 

@@ -1,9 +1,9 @@
 import { Router } from 'express';
 
-import bookingRoutes from "./modules/booking/booking.route";
+import {bookingRouter} from "./modules/booking/booking.route";
 
-const bookingRoute = Router();
+const router = Router();
 
-bookingRoute.use("/booking",bookingRoutes );
+router.use("/booking",bookingRouter);
 
-export default bookingRoute;
+export default router;
