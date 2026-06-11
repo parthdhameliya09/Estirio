@@ -1,11 +1,11 @@
 info:
-  name: Untitled
+  name: get crew
   type: http
   seq: 1
 
 http:
   method: GET
-  url: ""
+  url: http://localhost:3000/crews/
   auth: inherit
 
 settings:

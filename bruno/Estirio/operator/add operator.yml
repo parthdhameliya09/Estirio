@@ -1,0 +1,25 @@
+info:
+  name: add operator
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:3000/api/operators
+  body:
+    type: json
+    data: |-
+      {
+        "userId":"22222222-2222-2222-2222-222222222222",
+        "name": "prerak",
+        "gstNumber":"123456789123456",
+        "email":"sprerak1135@gmail.com",
+        "phoneNumber":"9328234761"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

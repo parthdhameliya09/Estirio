@@ -41,10 +41,16 @@ export const getOperatorController = async (
       success: true,
       data: operator,
     });
-  } catch (error: any) {
-    return res.status(404).json({
+  } catch (error) {
+    if(error instanceof Error){
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+      });
+    }
+    return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal server error",
     });
   }
 };
