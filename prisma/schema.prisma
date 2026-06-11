@@ -40,6 +40,7 @@ model users {
   isVerified     Boolean          @default(false) @map("is_verified")
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")
+  password       String
   bookings       bookings[]
   bus_operators  bus_operators[]
   crews          crews[]
