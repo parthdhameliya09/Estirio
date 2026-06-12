@@ -4,7 +4,7 @@ export interface AuthUser {
     roleId:string
 }
 
-export interface RegisterInput{
+export interface RegisterRequest{
     firstName:string
     lastName:string
     email:string
@@ -12,7 +12,10 @@ export interface RegisterInput{
     phoneNumber:string
 }
 
-export interface LoginInput {
+export interface RegisterInput extends RegisterRequest{
+    roleId:string
+}
+export interface LoginRequest {
     email:string
     password:string
 }
