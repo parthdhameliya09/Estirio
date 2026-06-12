@@ -1,17 +1,17 @@
 import { booking_status,seat_status } from "../../../generated/prisma/client";
 
-interface createBookinInputMaster{
+interface createBookingInputMaster{
     userId: string;
     tripId:string;
     pickupStopId:string;
     dropoffStopId:string;
 }
 
-export interface createBookingInput extends createBookinInputMaster{
+export interface createBookingInput extends createBookingInputMaster{
     passenger:passengerInfo[];
 }
 
-export interface createBookingInputRecord extends createBookinInputMaster{
+export interface createBookingInputRecord extends createBookingInputMaster{
     totalAmount:number;
     totalSeats:number;
     status:booking_status;

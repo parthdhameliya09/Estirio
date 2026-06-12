@@ -4,9 +4,7 @@ export const createBookingSchema = z.object({
   pickupStopId: z.uuid(),
   dropoffStopId: z.uuid(),
 
-  passenger: z
-    .array(
-      z.object({
+  passenger: z.object({
         firstName: z.string().trim().min(1, { error: "First name is required" }),
         lastName: z.string().trim().min(1, { error: "Last name is required" }),
         age: z
@@ -14,10 +12,8 @@ export const createBookingSchema = z.object({
           .int({ error: "Age must be an integer" })
           .positive({ error: "Age must be a positive number" }),
         seatInventoryId: z.uuid({ error: "Invalid seat inventory id" }),
-      }),
-    )
-    .min(1, { error: "At least one passenger is required" }),
-});
+      })
+})      
 
 export const updateBooking = z.object({
   params: z.object({
