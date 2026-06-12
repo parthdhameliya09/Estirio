@@ -7,6 +7,7 @@ export const addLocation=async({name,latitude,longitude}:locationData)=>{
             name,
             latitude,
             longitude
+            
         }
     })
 }
