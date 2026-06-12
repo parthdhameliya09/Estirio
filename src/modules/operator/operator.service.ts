@@ -1,3 +1,4 @@
+import { Prisma } from "../../../generated/prisma/client";
 import {createOperator as createOperatorDao,
     getOperatorById as getOperatorByIdDao,
     updateOperator as updateOperatorDao } from "./operator.dao"
