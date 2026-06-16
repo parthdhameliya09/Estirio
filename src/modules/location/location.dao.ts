@@ -1,13 +1,12 @@
 import prisma from "../../config/prisma";
 import { locationData,updateLocationData } from "./location.types";
 
-export const addLocation=async({name,latitude,longitude}:locationData)=>{
+export const addLocation = async({name,latitude,longitude}:locationData)=>{
     return await prisma.locations.create({
         data:{
             name,
             latitude,
-            longitude
-            
+            longitude  
         }
     })
 }
