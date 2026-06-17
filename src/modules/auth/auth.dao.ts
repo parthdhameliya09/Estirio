@@ -1,44 +1,35 @@
-import prisma from "../../config/prisma"
-import { RegisterInput } from "./auth.type"
-import {ApiError} from "../../utils/errors/api-error"
+import prisma from "../../config/prisma";
+import { RegisterInput } from "./auth.type";
+import { apiError } from "../../utils/errors/api-error";
 
-export async function findUserByEmail(email: string){
-    try{
-        return await prisma.users.findUnique({
-            where:{ email }
-        })
-    }catch(error){
-        console.error('Error occurred while fetching user by email:', error)
-        throw new  ApiError(501,'Internal server error')
-    }
-
+export async function findUserByEmail(email: string) {
+   return await prisma.users.findUnique({
+      where: { email },
+   });
 }
 
-export async function findRoleByName(name: string){
-
-    try {
-        const role = await  prisma.roles.findUnique({
-            where:{ name }
-        })
-        if (!role){
-            console.log('Role not found with name:', name)
-            throw new ApiError(404,'Role not found')
-        }
-        return role
-    } catch (error) {
-        console.error('Error occurred while fetching role by name:', error)
-        throw new ApiError(500,'Internal server error')
-    }
-    
+export async function findRoleByName(name: string) {
+   const role = await prisma.roles.findUnique({
+      where: { name },
+   });
+   if (!role) {
+      console.log("Role not found with name:", name);
+      throw apiError(404, "Role not found");
+   }
+   return role;
 }
 
-export async function createUser(data: RegisterInput){
-    try {
-        return await prisma.users.create({ data })
-        
-    } catch (error) {
-        console.error('Error occurred while creating user:', error)
-        throw new ApiError(500,'Internal server error')
-    }
+export async function createUser(data: RegisterInput) {
+   return await prisma.users.create({ data });
 }
 
+export async function hasPermission(roleId: string, permission: string) {
+   return await prisma.role_permissions.findFirst({
+      where: {
+         roleId,
+         permission: {
+            name: permission,
+         },
+      },
+   });
+}
