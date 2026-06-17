@@ -9,7 +9,7 @@ export async function findUserByEmail(email: string){
         })
     }catch(error){
         console.error('Error occurred while fetching user by email:', error)
-        throw new ApiError(500,'Internal server error')
+        throw new  ApiError(501,'Internal server error')
     }
 
 }

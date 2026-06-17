@@ -10,6 +10,7 @@ export function validate(schema:ZodSchema){
             query:req.query
         })
         if(!result.success){
+            console.log('Validation error:', result.error)
             return res.status(400).json({error :"validation error"})
         }
 

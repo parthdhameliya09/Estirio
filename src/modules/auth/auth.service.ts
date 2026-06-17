@@ -3,32 +3,31 @@ import { RegisterRequest,JWTPayload,LoginRequest } from './auth.type'
 import { hashPassword, comparePassword } from '../../utils/password'
 import { generateToken } from '../../utils/jwt'
 import { ApiError } from '../../utils/errors/api-error'
+import { _email } from 'zod/v4/core'
 const DEFAULT_ROLE = 'passenger'
 
 
 
 export async function registerService(data:RegisterRequest){
-        const { email:userEmail, password,firstName,lastName,phoneNumber } = data
-        const normalizedEmail = userEmail.trim().toLowerCase()
-
-        const existingUser = await authDao.findUserByEmail(normalizedEmail)
+    try {
         
+        const { email:userEmail, password,firstName,lastName,phoneNumber } = data
+        const existingUser = await authDao.findUserByEmail(userEmail)
         if(existingUser){
-            console.log('User already exists with email:', normalizedEmail)
+            console.log('User already exists with email:', userEmail)
             throw new ApiError(409,'User already exists with this email')
         }
-        
         const role = await authDao.findRoleByName(DEFAULT_ROLE)
         
         const hashedPassword = await hashPassword(data.password)
         
         const userData ={
             ...data,
-            email: normalizedEmail,
+            email: userEmail,
             password:hashedPassword,
             roleId: role?.id || ''
         }
-        
+        console.log('Creating user with data:', userData)
         const {id:userId,email,roleId} = await authDao.createUser(userData)
         
         const payload : JWTPayload = {
@@ -39,6 +38,9 @@ export async function registerService(data:RegisterRequest){
         const token = generateToken(payload)
         
         return { token }
+    } catch (error) {
+        throw  new ApiError(500,'Internal server error')   
+    }
     
 
 }
