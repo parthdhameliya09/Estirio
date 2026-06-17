@@ -1,31 +1,36 @@
-import * as authDao from "./auth.dao";
+import { findRoleByName, findUserByEmail, createUser } from "./auth.dao";
 import { RegisterRequest, JWTPayload, LoginRequest } from "./auth.type";
 import { hashPassword, comparePassword } from "../../utils/password";
 import { generateToken } from "../../utils/jwt";
 import { apiError } from "../../utils/errors/api-error";
 import { _email } from "zod/v4/core";
+
 const DEFAULT_ROLE = "passenger";
 
 export async function registerService(data: RegisterRequest) {
+
    const { email: userEmail, password, firstName, lastName, phoneNumber } = data;
-   const existingUser = await authDao.findUserByEmail(userEmail);
+   const existingUser = await findUserByEmail(userEmail);
 
    if (existingUser) {
       console.log("User already exists with email:", userEmail);
       throw apiError(409, "User already exists with this email");
    }
-   const role = await authDao.findRoleByName(DEFAULT_ROLE);
 
+   const role = await findRoleByName(DEFAULT_ROLE);
+   if(!role){
+    throw apiError(404,'Role not found')
+   }
    const hashedPassword = await hashPassword(data.password);
 
    const userData = {
       ...data,
       email: userEmail,
       password: hashedPassword,
-      roleId: role?.id || "",
+      roleId: role.id
    };
    console.log("Creating user with data:", userData);
-   const { id: userId, email, roleId } = await authDao.createUser(userData);
+   const { id: userId, email, roleId } = await createUser(userData);
 
    const payload: JWTPayload = {
       userId,
@@ -38,12 +43,13 @@ export async function registerService(data: RegisterRequest) {
 }
 
 export async function loginService(data: LoginRequest) {
-   const existingUser = await authDao.findUserByEmail(data.email);
+   const {email:userEmail,password} = data
+   const existingUser = await findUserByEmail(userEmail);
    if (!existingUser) {
-      console.log("No user found with email:", data.email);
+      console.log("No user found with email:", userEmail);
       throw apiError(401, "Invalid email or password");
    }
-   const passwordMatch = await comparePassword(data.password, existingUser.password);
+   const passwordMatch = await comparePassword(password, existingUser.password);
 
    if (!passwordMatch) {
       console.log("Invalid Password or Email");

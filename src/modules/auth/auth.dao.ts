@@ -9,14 +9,10 @@ export async function findUserByEmail(email: string) {
 }
 
 export async function findRoleByName(name: string) {
-   const role = await prisma.roles.findUnique({
+   return await prisma.roles.findUnique({
       where: { name },
    });
-   if (!role) {
-      console.log("Role not found with name:", name);
-      throw apiError(404, "Role not found");
-   }
-   return role;
+   
 }
 
 export async function createUser(data: RegisterInput) {
