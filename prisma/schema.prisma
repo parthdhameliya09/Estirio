@@ -58,7 +58,7 @@ model bus_operators {
   ownerUserId           String                  @map("owner_user_id")
   isActive              Boolean                 @default(true) @map("is_active")
   createdAt             DateTime                @default(now()) @map("created_at")
-  isPrivate             Boolean                 @default(true)
+  is_private            Boolean                 @default(true)
   owner                 users                   @relation(fields: [ownerUserId], references: [id])
   buses                 buses[]
   cancellation_policies cancellation_policies[]

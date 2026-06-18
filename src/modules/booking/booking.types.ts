@@ -1,53 +1,52 @@
-import { booking_status,seat_status } from "../../../generated/prisma/client";
+import { booking_status, seat_status } from "../../../generated/prisma/client";
 
-interface createBookingInputMaster{
-    userId: string;
-    tripId:string;
-    pickupStopId:string;
-    dropoffStopId:string;
-}
-
-export interface createBookingInput extends createBookingInputMaster{
-    passenger:passengerInfo[];
+interface createBookingInputMaster {
+  userId: string;
+  tripId: string;
+  pickupStopId: string;
+  dropoffStopId: string;
 }
 
-export interface createBookingInputRecord extends createBookingInputMaster{
-    totalAmount:number;
-    totalSeats:number;
-    status:booking_status;
-    cancellationReason:string;
+export interface createBookingInput extends createBookingInputMaster {
+  passenger: passengerInfo[];
 }
-export interface passengerInfo{
-    firstname:string;
-    lastname:string;
-    age:number;
-    gender:string;
-    seatInventoryId:string;
+
+export interface createBookingInputRecord extends createBookingInputMaster {
+  totalAmount: number;
+  totalSeats: number;
+  status: booking_status;
+  cancellationReason: string;
 }
-export interface seatRecordPayload{
-    seatInventoryId:string;
-    fare:number;
-    bookingId:string;
+export interface passengerInfo {
+  firstName: string;
+  lastName: string;
+  age: number;
+  gender: string;
+  seatInventoryId: string;
 }
-export interface passengerRecordPayload{
-    bookingId:string;
-    bookingSeatsId:string;
-    firstName:string;
-    lastName:string;
-    age:number;
-    gender:string;
+export interface seatRecordPayload {
+  seatInventoryId: string;
+  fare: number;
+  bookingId: string;
 }
-export interface updateStatusBookingPayload{
-    status:seat_status,
-    lockedBy:string,
-    lockedUntil:Date
+export interface passengerRecordPayload {
+  bookingId: string;
+  bookingSeatsId: string;
+  firstName: string;
+  lastName: string;
+  age: number;
+  gender: string;
 }
-export interface BookingParams{
+export interface updateStatusBookingPayload {
+  status: seat_status;
+  lockedBy: string;
+  lockedUntil: Date;
+}
+export interface BookingParams {
   bookingId: string;
 }
 
-export interface UpdateBookingRecord{
-    cancellationReason:string,
-    status:booking_status
+export interface UpdateBookingRecord {
+  cancellationReason: string;
+  status: booking_status;
 }
-

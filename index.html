@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Bus Ticket Payment</title>
+  </head>
+  <body>
+    <h2>Bus Ticket Payment</h2>
+
+    <button onclick="payNow()">Pay ₹500</button>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <script>
+      async function payNow() {
+        const bookingId = "cc2d0fc0-36e6-4197-afc0-7db6e0c6c061";
+
+        try {
+          // Create payment intent
+          const response = await fetch("http://localhost:3000/api/payment/create-intent", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              bookingId,
+            }),
+          });
+
+          const order = await response.json();
+          console.log(order);
+
+          const options = {
+            key: order.key,
+
+            amount: order.amount,
+
+            currency: order.currency,
+
+            name: "Estirio",
+
+            description: "Bus Ticket Booking",
+
+            order_id: order.orderId,
+
+            handler: async function (response) {
+              // Verify payment
+              const verifyResponse = await fetch("http://localhost:3000/api/payment/verify", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  bookingId: bookingId,
+                  razorpayOrderId: response.razorpay_order_id,
+
+                  razorpayPaymentId: response.razorpay_payment_id,
+
+                  razorpaySignature: response.razorpay_signature,
+                }),
+              });
+
+              const verifyResult = await verifyResponse.json();
+              console.log(verifyResponse);
+
+              alert(verifyResult.message);
+            },
+
+            modal: {
+              ondismiss: function () {
+                alert("Payment Cancelled");
+              },
+            },
+
+            theme: {
+              color: "#3399cc",
+            },
+          };
+
+          const rzp = new Razorpay(options);
+
+          rzp.open();
+        } catch (err) {
+          console.log(err);
+
+          alert("Something went wrong", err);
+        }
+      }
+    </script>
+  </body>
+</html>
