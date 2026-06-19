@@ -11,6 +11,6 @@ export const updateUserRoleController=async(req: Request, res: Response, next: N
 
       return res.json({ user: updated });
    } catch (error) {
-      throw apiError(500, "Internal Server Error");
+      return next(error)
    }
 }

@@ -1,8 +1,8 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { register, login } from "./auth.service";
-import { apiError } from "../../utils/errors/api-error";
+import { apiError,AppError } from "../../utils/errors/api-error";
 
-export const registerController = async (req: Request, res: Response) => {
+export const registerController = async (req: Request, res: Response,next:NextFunction) => {
    try {
       const data = req.body;
       console.log("Received registration data:", data);
@@ -10,17 +10,17 @@ export const registerController = async (req: Request, res: Response) => {
       res.status(201).json(result);
    } catch (error) {
       console.error("Error in registerController:", error);
-      throw apiError(500, "Internal server error");
+      return next(error)
    }
 };
 
-export const loginController = async (req: Request, res: Response) => {
+export const loginController = async (req: Request, res: Response,next:NextFunction) => {
    try {
       const data = req.body;
       const result = await login(data);
       res.status(200).json(result);
    } catch (error) {
       console.error("Error in loginController:", error);
-      throw apiError(500, "Internal server error");
+      return next(error);
    }
 };

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
-type AppError = Error & {
+export type AppError = Error & {
    statusCode?: number;
 };
 
