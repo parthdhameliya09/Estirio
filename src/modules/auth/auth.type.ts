@@ -24,6 +24,3 @@ export interface JWTPayload {
    email: string;
    roleId: string;
 }
-// export interface AuthResponse{
-//     token:string
-// }

@@ -3,47 +3,43 @@ import { RegisterRequest, JWTPayload, LoginRequest } from "./auth.type";
 import { hashPassword, comparePassword } from "../../utils/password";
 import { generateToken } from "../../utils/jwt";
 import { apiError } from "../../utils/errors/api-error";
-import { _email } from "zod/v4/core";
 
 const DEFAULT_ROLE = "passenger";
 
-export async function registerService(data: RegisterRequest) {
-
+export const register = async (data: RegisterRequest) => {
    const { email: userEmail, password, firstName, lastName, phoneNumber } = data;
+   console.log("checking user");
    const existingUser = await findUserByEmail(userEmail);
-
+   console.log(existingUser);
    if (existingUser) {
       console.log("User already exists with email:", userEmail);
       throw apiError(409, "User already exists with this email");
    }
-
    const role = await findRoleByName(DEFAULT_ROLE);
-   if(!role){
-    throw apiError(404,'Role not found')
+   if (!role) {
+      throw apiError(404, "Role not found");
    }
    const hashedPassword = await hashPassword(data.password);
-
    const userData = {
       ...data,
       email: userEmail,
       password: hashedPassword,
-      roleId: role.id
+      roleId: role.id,
    };
+
    console.log("Creating user with data:", userData);
    const { id: userId, email, roleId } = await createUser(userData);
-
    const payload: JWTPayload = {
       userId,
       email,
       roleId,
    };
    const token = generateToken(payload);
-
    return { token };
-}
+};
 
-export async function loginService(data: LoginRequest) {
-   const {email:userEmail,password} = data
+export const login = async (data: LoginRequest) => {
+   const { email: userEmail, password } = data;
    const existingUser = await findUserByEmail(userEmail);
    if (!existingUser) {
       console.log("No user found with email:", userEmail);
@@ -65,4 +61,4 @@ export async function loginService(data: LoginRequest) {
    const token = generateToken(payload);
 
    return { token };
-}
+};

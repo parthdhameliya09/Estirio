@@ -1,25 +1,26 @@
 import prisma from "../../config/prisma";
 import { RegisterInput } from "./auth.type";
 import { apiError } from "../../utils/errors/api-error";
+import { usersCreateInput } from "../../../generated/prisma/models";
 
-export async function findUserByEmail(email: string) {
+export const findUserByEmail = async (email: string) => {
+   console.log("finding user");
    return await prisma.users.findUnique({
       where: { email },
    });
-}
+};
 
-export async function findRoleByName(name: string) {
+export const findRoleByName = async (name: string) => {
    return await prisma.roles.findUnique({
       where: { name },
    });
-   
-}
+};
 
-export async function createUser(data: RegisterInput) {
+export const createUser = async (data: RegisterInput) => {
    return await prisma.users.create({ data });
-}
+};
 
-export async function hasPermission(roleId: string, permission: string) {
+export const hasPermission = async (roleId: string, permission: string) => {
    return await prisma.role_permissions.findFirst({
       where: {
          roleId,
@@ -28,4 +29,4 @@ export async function hasPermission(roleId: string, permission: string) {
          },
       },
    });
-}
+};

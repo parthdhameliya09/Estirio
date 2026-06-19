@@ -1,29 +1,28 @@
-import { findUserById, updateUser, deleteUser, getAllUsers } from "./user.dao";
+import {
+   findUserById,
+   updateUser as updaterUserDao,
+   deleteUser as deleteUserDao,
+   getAllUsers,
+} from "./user.dao";
 import { apiError } from "../../utils/errors/api-error";
+import { updateUser as updateUserType } from "./user.type";
 
-export async function getUsersService() {
+export const getUsersService = async () => {
    return getAllUsers();
-}
+};
 
-export async function getUserByIdService(id: string) {
+export const getUserById = async (id: string) => {
    const user = await findUserById(id);
    if (!user) {
       throw apiError(404, "User not Found");
    }
-}
+   return user;
+};
 
-export async function updateUserService(
-   id: string,
-   data: {
-      firstName?: string;
-      lastName?: string;
-      phoneNumber?: string;
-      roleId?: string;
-   },
-) {
-   return await updateUser(id, data);
-}
+export const updateUser = async (id: string, data: updateUserType) => {
+   return await updaterUserDao(id, data);
+};
 
-export async function deleteUserService(id: string) {
-   return deleteUser(id);
-}
+export const deleteUser = async (id: string) => {
+   return await deleteUserDao(id);
+};

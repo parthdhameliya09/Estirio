@@ -1,19 +1,25 @@
-import {getUserByIdService,updateUserService} from "./user.service";
+import { apiError } from "../../utils/errors/api-error";
+import { getUserById, updateUser, deleteUser } from "./user.service";
 import { Request, Response } from "express";
 
-export async function getUserByIdController(req: Request, res: Response) {
-
+export const getUserByIdController = async (req: Request, res: Response) => {
+   console.log("got user request");
    const userId = req.user.userId;
-   const user = getUserByIdService(userId);
-   
-}
+   const user = await getUserById(userId);
+   res.json(user);
+};
 
-export async function updateUser(req: Request, res: Response) {
+export const updateUserController = async (req: Request, res: Response) => {
    const userId = req.user.userId;
    const userData = req.body;
-   const user = updateUserService(userId, userData);
-}
+   const user = await updateUser(userId, userData);
+   res.json(user);
+};
 
-export async function deleteUser(req: Request, res: Response) {
-   const userId = req.user.userId;
-}
+export const deleteUserController = async (req: Request, res: Response) => {
+   const deleteuser = await deleteUser(req.user.userId);
+   if (!deleteuser) {
+      throw apiError(500, "Internal Server Error");
+   }
+   res.status(204).send();
+};
