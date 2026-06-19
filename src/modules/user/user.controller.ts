@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 
 export const getUserByIdController = async (req: Request, res: Response, next: NextFunction) => {
    try {
-      const userId = req.user.userId;
+      const {userId} = req.user;
       const user = await getUserById(userId);
       res.json(user);
    } catch (error) {
