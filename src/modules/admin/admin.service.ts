@@ -5,7 +5,7 @@ import { AssignRoleInput } from "./admin.type";
 import { findRoleByName } from "../auth/auth.dao";
 import { updateUserRole } from "./admin.dao";
 
-export const  updateUserRoleService=async(data: AssignRoleInput)=> {
+export const updateUserRoleService = async (data: AssignRoleInput) => {
    // Validate target user exists
    const { targetUserId, targetUserRole, userId, roleId } = data;
 
@@ -48,4 +48,4 @@ export const  updateUserRoleService=async(data: AssignRoleInput)=> {
    }
 
    return await updateUserRole(role.id, target.id);
-}
+};

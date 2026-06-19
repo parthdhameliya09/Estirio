@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { updateUserRoleService } from "./admin.service";
 import { apiError } from "../../utils/errors/api-error";
-export const updateUserRoleController=async(req: Request, res: Response, next: NextFunction)=> {
+export const updateUserRoleController = async (req: Request, res: Response, next: NextFunction) => {
    try {
       const data = {
          ...req.user,
@@ -11,6 +11,6 @@ export const updateUserRoleController=async(req: Request, res: Response, next: N
 
       return res.json({ user: updated });
    } catch (error) {
-      return next(error)
+      return next(error);
    }
-}
+};
