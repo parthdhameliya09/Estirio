@@ -14,7 +14,7 @@ export const getUserByIdController = async (req: Request, res: Response, next: N
 
 export const updateUserController = async (req: Request, res: Response, next: NextFunction) => {
    try {
-      const userId = req.user.userId;
+      const {userId} = req.user;
       const userData = req.body;
       const user = await updateUser(userId, userData);
       res.json(user);

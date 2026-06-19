@@ -31,7 +31,7 @@ export const updateUserRoleService = async (data: AssignRoleInput) => {
       throw apiError(500, "Admin role not configured");
    }
 
-   // Prevent removing the last admin
+   // Prevent removing the only admin Role
    if (target.roleId === adminRole.id && role.id !== adminRole.id) {
       const adminCount = await prisma.users.count({
          where: {
@@ -43,6 +43,7 @@ export const updateUserRoleService = async (data: AssignRoleInput) => {
          throw apiError(400, "Cannot remove the last admin");
       }
    }
+   // Prevent own role changing 
    if (targetUserId === userId) {
       throw apiError(403, "You cannot change your own role");
    }
