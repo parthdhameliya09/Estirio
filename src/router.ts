@@ -6,6 +6,8 @@ import operatorRoutes from "./modules/operator/operator.routes";
 import bookingRoutes from "./modules/booking/booking.route";
 import crewRoutes from "./modules/crew/crew.routes";
 import busRoutes from "./modules/bus/bus.routes";
+import { userRouter } from "./modules/user/user.routes";
+import { adminRouter } from "./modules/admin/admin.routes";
 export const router = Router();
 
 // router.use("/auth", authRoutes);
@@ -18,4 +20,5 @@ router.use("/buses", busRoutes);
 
 
 router.use("/auth", authRouter);
-
+router.use("/user", userRouter);
+router.use("/admin", adminRouter);

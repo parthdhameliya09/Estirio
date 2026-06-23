@@ -1,8 +1,9 @@
-declare namespace Express {
-  export interface Request {
-    user: {
-      id: string;
-      role?: string;
-    };
-  }
+import { AuthUser } from "../modules/auth/auth.type";
+
+declare global {
+   namespace Express {
+      interface Request {
+         user: AuthUser;
+      }
+   }
 }
