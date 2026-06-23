@@ -17,13 +17,7 @@ import {
     UpdateSeatConfigRequest,
 } from "./bus.types";
 
-export const createBus = async ({
-    operatorId,
-    vehicleNumber,
-    registrationNumber,
-    type,
-    totalSeats,
-}: CreateBusRequest) => {
+export const createBus = async ({operatorId,vehicleNumber,registrationNumber,type,totalSeats,}: CreateBusRequest) => {
     const data: Prisma.busesCreateInput = {
         vehicleNumber,
         registrationNumber,
@@ -32,7 +26,7 @@ export const createBus = async ({
         bus_operator: { connect: { id: operatorId } },
     };
 
-    return createBusDao(data);
+    return await createBusDao(data);
 };
 
 export const getBus = async (id: string) => {
@@ -42,36 +36,22 @@ export const getBus = async (id: string) => {
 };
 
 export const getBusesByOperator = async (operatorId: string) => {
-    return getBusesByOperatorDao(operatorId);
+    return await getBusesByOperatorDao(operatorId);
 };
 
-export const updateBus = async ({
-    id,
-    vehicleNumber,
-    registrationNumber,
-    type,
-    totalSeats,
-    isActive,
-}: UpdateBusRequest) => {
-    const updateData: Prisma.busesUpdateInput = {};
+export const updateBus = async ({id,vehicleNumber,registrationNumber,type,totalSeats,isActive,}: UpdateBusRequest) => {
+    const updateData: Prisma.busesUpdateInput = {
+        vehicleNumber,
+        registrationNumber,
+        type,
+        totalSeats,
+        isActive,
+    };
 
-    if (vehicleNumber !== undefined) updateData.vehicleNumber = vehicleNumber;
-    if (registrationNumber !== undefined) updateData.registrationNumber = registrationNumber;
-    if (type !== undefined) updateData.type = type;
-    if (totalSeats !== undefined) updateData.totalSeats = totalSeats;
-    if (isActive !== undefined) updateData.isActive = isActive;
-
-    return updateBusDao({ id, updateData });
+    return await updateBusDao({ id, updateData });
 };
 
-export const createSeatConfig = async ({
-    busId,
-    seatNumber,
-    seatType,
-    deck,
-    isWindow,
-    isLadiesSeat,
-}: CreateSeatConfigRequest) => {
+export const createSeatConfig = async ({ busId, seatNumber, seatType, deck, isWindow, isLadiesSeat,}: CreateSeatConfigRequest) => {
     const data: Prisma.seat_configsCreateInput = {
         seatNumber,
         seatType,
@@ -81,7 +61,7 @@ export const createSeatConfig = async ({
         bus: { connect: { id: busId } },
     };
 
-    return createSeatConfigDao(data);
+    return await createSeatConfigDao(data);
 };
 
 export const getSeatConfig = async (id: string) => {
@@ -91,27 +71,21 @@ export const getSeatConfig = async (id: string) => {
 };
 
 export const getSeatConfigsByBus = async (busId: string) => {
-    return getSeatConfigsByBusDao(busId);
+    return await getSeatConfigsByBusDao(busId);
 };
 
-export const updateSeatConfig = async ({
-    id,
-    seatType,
-    deck,
-    isWindow,
-    isLadiesSeat,
-}: UpdateSeatConfigRequest) => {
-    const updateData: Prisma.seat_configsUpdateInput = {};
+export const updateSeatConfig = async ({id,seatType, deck, isWindow, isLadiesSeat,}: UpdateSeatConfigRequest) => {
+    const updateData: Prisma.seat_configsUpdateInput = {
+        seatType,
+        deck,
+        isWindow,
+        isLadiesSeat,
+    };
 
-    if (seatType !== undefined) updateData.seatType = seatType;
-    if (deck !== undefined) updateData.deck = deck;
-    if (isWindow !== undefined) updateData.isWindow = isWindow;
-    if (isLadiesSeat !== undefined) updateData.isLadiesSeat = isLadiesSeat;
-
-    return updateSeatConfigDao({ id, updateData });
+    return await updateSeatConfigDao({ id, updateData });
 };
 
 export const deleteSeatConfig = async (id: string) => {
-    await getSeatConfig(id); // throws if not found
-    return deleteSeatConfigDao(id);
+    await getSeatConfig(id); 
+    return await deleteSeatConfigDao(id);
 };

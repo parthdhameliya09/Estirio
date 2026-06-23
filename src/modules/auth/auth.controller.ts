@@ -1,5 +1,4 @@
 import { Request, Response } from 'express'
-
 import { registerService, loginService } from './auth.service'
 
 
