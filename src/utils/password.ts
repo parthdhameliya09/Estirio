@@ -3,9 +3,9 @@ import bcrypt from "bcryptjs";
 const SALT_ROUNDS = 12;
 
 export async function hashPassword(password: string): Promise<string> {
-  return await bcrypt.hash(password, SALT_ROUNDS);
+   return await bcrypt.hash(password, SALT_ROUNDS);
 }
 
 export async function comparePassword(password: string, hashedPassword: string) {
-  return await bcrypt.compare(password, hashedPassword);
+   return await bcrypt.compare(password, hashedPassword);
 }

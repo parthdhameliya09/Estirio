@@ -6,3 +6,4 @@ node_modules
 /dist
 /PROJECT_CONTEXT.md
 .vscode
+CONTEXT.md
