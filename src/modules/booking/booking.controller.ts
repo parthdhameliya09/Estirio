@@ -27,7 +27,7 @@ export const getBooking = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-export const getBookingById = async (req: Request<BookingParams>, res: Response) => {
+export const getBookingById = async (req: Request<updateBookingParamsRequest['params']>, res: Response) => {
   try {
     const { bookingId } = req.params;
     const result = await getBookingByIdService(bookingId);

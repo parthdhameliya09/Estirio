@@ -13,7 +13,7 @@ import {
 import { createRazorPayOrder, verifyRazorpaySignature } from "./razorpay.service";
 import prisma from "../../config/prisma.js";
 import { getBookingSeatsById } from "../booking/booking.dao";
-import { error } from "node:console";
+import { generateTicket } from "../ticket-generation/ticket.service";
 
 export const createPaymentIntent = async ({ bookingId }: paymentData) => {
   try {
@@ -115,7 +115,10 @@ export const verifyPayment = async ({
 
     await updateSeatDao(seatIds, tx);
 
+    const pdfUrl=await generateTicket(bookingId);
+
     return {
+      pdfUrl,
       success: true,
       message: "Payment verified",
     };
